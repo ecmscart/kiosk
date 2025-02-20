@@ -1,0 +1,356 @@
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% extends 'admin/layouts/admin_layout.html' %}
+{% block title %}Kiosk Printer{% endblock %}
+{% block content %}
+<div class="content-wrapper">
+    <div class="container">
+        <h2 class="pt-3">Printers</h2>
+        <button class="btn btn-primary my-3" id="openAddPrinterModal" data-bs-toggle="modal" data-bs-target="#addPrinterModal"><i class="fas fa-plus"></i>
+        </button>
+        <div class="table-responsive">
+            <table id="printerTable" class="display table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Printer Number</th>
+                        <th>Printer Name</th>
+                        <th>A3 Tray</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- DataTable rows are populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Location Modal -->
+    <div class="modal fade" id="addPrinterModal" tabindex="-1" aria-labelledby="addPrinterModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPrinterModalLabel">Add/Edit Printer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="printerForm">
+                        <input type="hidden" id="id" name="id">
+                        <div class="mb-3">
+                            <label for="location_id" class="form-label">Location <span style="color:red">*</span></label>
+                            <select class="form-control" id="location_id" name="location_id" required>
+                                <option value="" selected disabled>-- Select Location --</option>
+                                {% for location in locations %}
+                                <option value="{{ location.id }}">{{ location.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>                        
+                        <div class="mb-3">
+                            <label for="printer_no" class="form-label">Printer Number <span style="color:red">*</span></label>
+                            <input type="text" class="form-control" id="printer_no" name="printer_no" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Printer Name <span style="color:red">*</span></label>
+                            <input class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="A3tray" class="form-label">A3 Tray <span style="color:red">*</span></label>
+                            <select class="form-control" id="A3tray" name="A3tray" required>
+                               
+                                <option value="1">1st tray</option>
+                                <option value="2">2nd tray</option>
+                                <option value="3">3rd tray</option>
+                                <option value="4">4th tray</option>
+                                <option value="5">5th tray</option>
+                                <option value="6">6th tray</option>
+                                <option value="7">7th tray</option>
+                                <option value="8">8th tray</option>
+                                <option value="9">9th tray</option>
+                                <option value="10">10th tray</option>
+                                
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-control" id="status" name="status" required>
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Printer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    let table = '';
+    $(document).ready(function () {
+        // Initialize DataTable
+        table = $('#printerTable').DataTable({
+        processing: false,
+        serverSide: true,
+        searching: true,
+        paging: true,
+        order: [[0, 'DESC']],
+        pageLength: 10,
+        stateSave: false,
+        ajax: {
+            "url": "{% url 'display_printer' %}",
+            
+        },
+        columns: [
+            { data: 'LocationId',name:'location_id',orderable: false,searchable: false },
+            { data: 'Printer_no',orderable: false,searchable: false },
+            { data: 'Name',orderable: false,searchable: false },
+            { data: 'A3tray',orderable: false,searchable: false },
+            { data: 'Status',orderable: false,searchable: false },
+            { data: 'Created At',orderable: false,searchable: false },
+            { data: null, orderable: false, searchable: false } // Placeholder for action
+            
+        ],
+        columnDefs: [
+            
+            {
+                targets: 0,
+                render: function (data, type, row) {
+                  var location_id = (row.location_id!=null) ? row.location_id : '--'; 
+                  return location_id;
+                }
+            },
+
+            {
+                targets: 1,
+                render: function (data, type, row) {
+                  var printer_no = (row.printer_no!=null) ? row.printer_no : null; 
+                  return printer_no;
+                }
+            },
+            {
+                targets: 2,
+                render: function (data, type, row) {
+                  var name = (row.name!=null) ? row.name : null; 
+                  return name;
+                }
+            },
+
+            {
+                targets: 3,
+                render: function (data, type, row) {
+                  var A3tray = (row.A3tray!=null) ? row.A3tray : null; 
+                  return A3tray;
+                }
+            },
+            
+            
+
+            {
+                targets: 4,
+                render: function (data, type, row) {
+                    var status = (row.status && row.status == 1) ? '<a href="javascript:void(0);" class="btn btn-success">Active</a>' : '<a href="javascript:void(0);" class="btn btn-danger">De-activate</a>'; 
+                    return status;
+                }
+            },
+
+            {
+                targets: 5,
+                render: function (data, type, row) {
+                    var created_at = (row.created_at!=null) ? row.created_at : null; 
+                    return created_at;
+                    
+                }
+            },
+
+           {
+                targets: -1,
+                data: null,
+                orderable: false,
+                className: 'text-end',
+                render: function (data, type, row) {
+                    return `
+                    <a href="javascript:void(0);" 
+                        data-id="${row.id}"
+                        data-location_id="${row.location_id}" 
+                        data-printer_no="${row.printer_no}" 
+                        data-name="${row.name}"
+                        data-A3tray="${row.A3tray}" 
+                        data-status="${row.status}"
+                        class="btn btn-warning btn-sm edit-printer"><i class="fas fa-edit"></i></a>&nbsp;
+                    <a href="javascript:void(0);" 
+                        data-id="${row.id}" 
+                        class="btn btn-danger btn-sm delete-printer"><i class="fas fa-trash"></i></a>
+                `;
+                    
+                },
+            },
+            
+        ],
+    }); 
+
+        // Open Add Location Modal
+        $('#openAddPrinterModal').on('click', function () {
+            $('#printerForm')[0].reset();  // Reset the form
+            $('#addPrinterModalLabel').text('Add Printer');  // Update modal title
+            $('#id').val('');  // Clear the hidden ID field
+        });
+
+        // Open Edit Location Modal
+        $('#printerTable').on('click', '.edit-printer', function () {
+            const button = $(this);
+            const Id = button.data('id');
+            const locationId = button.data('location_id');
+            const printer_no = button.data('printer_no');
+            const name = button.data('name');
+            const A3tray= button.data('A3tray');
+            const status = button.data('status');
+            
+            $('#id').val(Id);
+            $('#location_id').val(locationId);
+            $('#printer_no').val(printer_no);
+            $('#name').val(name);
+            $('#A3tray').val(A3tray);
+            $('#status').val(status);
+            $('#addPrinterModalLabel').text('Edit Printer');  // Update modal title
+            $('#addPrinterModal').modal('show');
+        });
+        
+
+
+        $("#printerForm").validate({
+        rules: {
+            printer_no: {
+                required: true
+            },
+            name: {
+                required: true
+            },
+            location_id: {
+                required: true
+            }
+        },
+        messages: {
+            printer_no: {
+                required: "Please enter a printer number"
+            },
+            name: {
+                required: "Please enter a printer name"
+            },
+          
+            location_id: {
+                required: "Please enter a location Name"
+            }
+        },
+        submitHandler: function (form) {
+            // The form will not be submitted until here because of validate
+            const Id = $('#id').val();
+            const url = Id
+                ? "{% url 'edit_printer' '0' %}".replace('0', Id)
+                : "{% url 'create_printer' %}";
+
+            // Create FormData for sending data
+            const formData = new FormData(form);
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                processData: false, // Don't process the data
+                contentType: false, // Let the browser set the content type
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}' // CSRF Token for protection
+                },
+                success: function (response) {
+                        $('#addPrinterModal').modal('hide'); // Hide the modal
+                        Swal.fire({
+                        title: "Success!",
+                        text: response.message,
+                        icon: "success"
+                        });
+                        $('.modal-backdrop').remove();  // Remove backdrop
+                        table.ajax.reload();  // Reload DataTable
+                    
+                },
+                error: function () {
+                    Swal.fire({
+                        title: "Error!",
+                        icon: "error"
+                        });
+                }
+            });
+        }
+    });
+   
+
+        // // Save Location
+        // $('#printerForm').on('submit', function (e) {
+        //     e.preventDefault();
+
+        //     const formData = new FormData(this);
+        //     console.log(formData);
+        //     const Id = $('#id').val();
+        //     console.log(Id);
+        //     const url = Id 
+        //         ? "{% url 'edit_printer' '0' %}".replace('0', Id)
+        //         : "{% url 'create_printer' %}";
+            
+        //     $.ajax({
+        //         url: url,
+        //         type: 'POST',
+        //         data: formData,
+        //         processData: false,
+        //         contentType: false,
+        //         headers: {
+        //             'X-CSRFToken': '{{ csrf_token }}'
+        //         },
+        //         success: function (response) {
+        //             $('#addPrinterModal').modal('hide');
+        //             alert(response.message);
+        //             $('.modal-backdrop').remove();  // Remove backdrop
+        //             table.ajax.reload();  // Reload DataTable
+        //         },
+        //         error: function () {
+        //             alert('Failed to save printer. Please try again.');
+        //         }
+        //     });
+        // });
+
+        // Delete Location
+        $('#printerTable').on('click', '.delete-printer', function () {
+            const button = $(this);
+            const Id = button.data('id');
+            console.log(Id);
+            if (!confirm('Are you sure you want to delete this printer?')) return;
+
+            $.ajax({
+                url: "{% url 'delete_printer' '0' %}".replace('0', Id),
+                type: 'DELETE',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    Swal.fire({
+                        title: "Success!",
+                        text: "Printer deleted successfully.",
+                        icon: "success"
+                        });
+                    table.ajax.reload();  // Reload DataTable
+                },
+                error: function () {
+                    Swal.fire({
+                        title: "Error!",
+                        icon: "error"
+                        });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

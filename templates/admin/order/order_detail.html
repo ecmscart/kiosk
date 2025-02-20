@@ -1,0 +1,207 @@
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% extends 'admin/layouts/admin_layout.html' %}
+{% block title %} Order Details {% endblock %}
+{% block content %}
+<div class="content-wrapper">
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                <h2 class="py-3">Order Details</h2>
+            </div>
+            <div class="col-6">
+                <a href="{% url 'order_list' %}" class="btn btn-secondary my-3 float-right">Back to Orders</a>
+            </div>
+        </div>
+        
+       
+        <div class="row">
+            <div class="col-6">
+              <table class="table table-bordered" id="orderTable1">
+                      <tr>
+                          <th>Order ID</th>
+                          <td>{{ order.order_id }}</td>
+                      </tr>
+                      <tr>
+                          <th>Total Paid</th>
+                          <td>{{ order.total_paid }}</td>
+                      </tr>
+                      <tr>
+                          <th>Pages Selected</th>
+                          <td>{{ order.pages_selected }}</td>
+                      </tr>
+                      <tr>
+                          <th>is_singleside</th>
+                          <td>{{ order.is_singleside}}</td>
+                      </tr>
+                      <tr>
+                          <th>is_color</th>
+                          <td>{{ order.is_color }}</td>
+                      </tr>
+                      <tr>
+                          <th>No. of Copies</th>
+                          <td>{{ order.no_copy }}</td>
+                      </tr>
+                      <tr>
+                          <th>Page Type</th>
+                          <td>{{ order.page_type }}</td>
+                      </tr>
+                      <tr>
+                          <th>Recipt File</th>
+                          <td>{{ order.recipt_file }}</td>
+                      </tr>
+                      <tr>
+                          <th>Is Paid</th>
+                          <td>{{ order.is_paid }}</td>
+                      </tr>
+                      <tr>
+                        <th>Transaction Id</th>
+                        <td>{{ order.trx_id}}</td>
+                    </tr> 
+                  </table>
+        
+            </div>
+        
+            <div class="col-6">
+              <table class="table table-bordered" id="orderTable">
+                 
+                  <tr>
+                      <th>Location</th>
+                      <td>{{ order.kiosk_location_name }}</td>
+                  </tr>
+                  <tr>
+                      <th>Printer Name</th>
+                      <td>{{ order.printer_name }}</td>
+                  </tr>
+                  <tr>
+                      <th>Printer Id</th>
+                      <td>{{ order.printer_id }}</td>
+                  </tr>
+                  <tr>
+                      <th>Kiosk Id</th>
+                      <td>{{ order.kiosk_id }}</td>
+                  </tr>
+                  <tr>
+                      <th>Device Id</th>
+                      <td>{{ order.mobile_device_id }}</td>
+                  </tr>
+                  <tr>
+                      <th>Date Paid</th>
+                      <td>{{ order.date_paid|default:"N/A" }}</td>
+                  </tr>
+                  <tr>
+                      <th>Date Printed</th>
+                      <td>{{ order.date_printed|default:"N/A" }}</td>
+                  </tr>
+                  <tr>
+                      <th>Order Status</th>
+                      <td>
+                          <span id="order-status">{{ order.order_status }}</span>
+                          <!-- Add data attributes to the Edit button -->
+                          <button 
+                              class="btn btn-primary btn-sm edit-order" 
+                              data-order_id="{{ order.order_id }}" 
+                              data-order_status="{{ order.order_status }}"><i class="fas fa-edit"></i></button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <th>Created At</th>
+                      <td>{{ order.created_at }}</td>
+                  </tr>
+        
+              </table>
+            </div>
+        </div>
+      
+        <!-- Update status Modal -->
+        <div class="modal fade" id="addOrderModal" tabindex="-1" aria-labelledby="addOrderModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addOrderModalLabel">Edit Status</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="orderForm">
+                            <input type="hidden" id="order_id" name="order_id">
+                            <div class="mb-3">
+                                <label for="order_status" class="form-label">Status</label>
+                                <select class="form-control" id="order_status" name="order_status" required>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Printed">Printed</option>
+                                    <option value="Paid">Paid</option>
+                                    <option value="Refunded">Refunded</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save </button>         
+                        </form>
+                    </div>
+            </div>
+        </div>
+
+       
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+// let table = $('#orderTable').table();
+    
+// Open Edit Location Modal when Edit button is clicked
+$('#orderTable').on('click', '.edit-order', function () {
+    const orderId = $(this).data('order_id');
+    const orderStatus = $(this).data('order_status');
+        
+    // Set the values in the modal
+    $('#order_id').val(orderId);
+    $('#order_status').val(orderStatus);
+        
+    // Show the modal
+    $('#addOrderModal').modal('show');
+    });
+
+// Submit the form via AJAX
+$('#orderForm').on('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const orderId = $('#order_id').val();
+    const newStatus = $('#order_status').val();
+    $.ajax({
+        url: "{% url 'edit_order_status' '0' %}".replace('0', orderId),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        success: function (response) {
+            $('#addOrderModal').modal('hide');
+            
+
+            Swal.fire({
+                        title: "Success!",
+                        text: "Status updated successfully.",
+                        icon: "success",
+                        }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Reload the page after user clicks OK
+                            location.reload();
+                        }
+    });
+            // Update the order status dynamically in the table
+            $('span#order-status').text(newStatus); 
+           
+            console.log("success")
+        },
+        error: function () {
+            alert('Failed to update order status. Please try again.');
+        }
+    });
+});
+
+    
+</script>
+
+{% endblock %}

@@ -1,0 +1,370 @@
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% extends 'admin/layouts/admin_layout.html' %}
+{% block title %} Print Cost{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <div class="container">
+        <h2 class="pt-3">Cost</h2>
+        <button class="btn btn-primary my-3" id="openAddCostModal" data-bs-toggle="modal" data-bs-target="#addCostModal"><i class="fas fa-plus"></i>
+        </button>
+        <div class="table-responsive">
+            <table id="costTable" class="display table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Page Type</th>
+                        <th>Min Page</th>
+                        <th>Max Page</th>
+                        <th>Black Print Price</th>
+                        <th>Color Print price</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- DataTable rows are populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Location Modal -->
+    <div class="modal fade" id="addCostModal" tabindex="-1" aria-labelledby="addCostModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCostModalLabel">Add/Edit Cost</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="costForm">
+                        <input type="hidden" id="id" name="id">
+                        <div class="mb-3">
+                            <label for="page_type" class="form-label">Page Type <span style="color:red">*</span> </label>
+                            <select class="form-control" id="page_type" name="page_type" required>
+                                <option value="" selected disabled>-- Select Page Type --</option>
+                            
+                                <option value="A3">A3</option>
+                                <option value="A4">A4</option>
+                                
+                            </select>
+                        </div>                        
+                        <div class="mb-3">
+                            <label for="min_page" class="form-label">Min Page <span style="color:red">*</span></label>
+                            <input type="number" class="form-control" id="min_page" name="min_page" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="max_page" class="form-label">Max page <span style="color:red">*</span></label>
+                            <input type="number" class="form-control" id="max_page" name="max_page" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="black_price" class="form-label">Black Print Price <span style="color:red">*</span></label>
+                            <input type="number" class="form-control" id="black_price" name="black_price" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="color_price" class="form-label">Color Print Price <span style="color:red">*</span></label>
+                            <input type="number" class="form-control" id="color_price" name="color_price" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-control" id="status" name="status" required>
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Cost</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    let table = '';
+    $(document).ready(function () {
+        // Initialize DataTable
+        table = $('#costTable').DataTable({
+        processing: false,
+        serverSide: true,
+        searching: true,
+        paging: true,
+        order: [[0, 'DESC']],
+        pageLength: 10,
+        stateSave: false,
+        ajax: {
+            "url": "{% url 'display_cost' %}",
+            
+        },
+        columns: [
+            { data: 'page_type',name:'page_type',orderable: false,searchable: false },
+            { data: 'min_page',orderable: false,searchable: false },
+            { data: 'max_page',orderable: false,searchable: false },
+            { data: 'black_price',orderable: false,searchable: false },
+            { data: 'color_price',orderable: false,searchable: false },
+            { data: 'Status',orderable: false,searchable: false },
+            { data: 'Created At',orderable: false,searchable: false },
+            { data: null, orderable: false, searchable: false } // Placeholder for action
+            
+        ],
+        columnDefs: [
+            
+            {
+                targets: 0,
+                render: function (data, type, row) {
+                  var page_type = (row.page_type!=null) ? row.page_type : '--'; 
+                  return page_type;
+                }
+            },
+
+            {
+                targets: 1,
+                render: function (data, type, row) {
+                  var min_page = (row.min_page!=null) ? row.min_page : null; 
+                  return min_page;
+                }
+            },
+
+            {
+                targets: 2,
+                render: function (data, type, row) {
+                  var max_page = (row.max_page!=null) ? row.max_page : null; 
+                  return max_page;
+                }
+            },
+
+            {
+                targets: 3,
+                render: function (data, type, row) {
+                  var black_price = (row.black_price!=null) ? row.black_price : null; 
+                  return black_price;
+                }
+            },
+
+            {
+                targets: 4,
+                render: function (data, type, row) {
+                  var color_price = (row.color_price!=null) ? row.color_price : null; 
+                  return color_price;
+                }
+            },
+
+            {
+                targets: 5,
+                render: function (data, type, row) {
+                    var status = (row.status && row.status == 1) ? '<a href="javascript:void(0);" class="btn btn-success">Active</a>' : '<a href="javascript:void(0);" class="btn btn-danger">De-activate</a>'; 
+                    return status;
+                }
+            },
+
+            {
+                targets: 6,
+                render: function (data, type, row) {
+                    var created_at = (row.created_at!=null) ? row.created_at : null; 
+                    return created_at;
+                    
+                }
+            },
+
+           {
+                targets: -1,
+                data: null,
+                orderable: false,
+                className: 'text-end',
+                render: function (data, type, row) {
+                    return `
+                    <a href="javascript:void(0);" 
+                        data-id="${row.id}"
+                        data-page_type="${row.page_type}" 
+                        data-min_page="${row.min_page}" 
+                        data-max_page="${row.max_page}" 
+                        data-black_price="${row.black_price}" 
+                        data-color_price="${row.color_price}" 
+                        data-status="${row.status}"
+                        class="btn btn-warning btn-sm edit-cost"><i class="fas fa-edit"></i></a>&nbsp;
+                    <a href="javascript:void(0);" 
+                        data-id="${row.id}" 
+                        class="btn btn-danger btn-sm delete-cost"><i class="fas fa-trash"></i></a>
+                `;
+                    
+                },
+            },
+            
+        ],
+    }); 
+
+        // Open Add Cost Modal
+        $('#openAddCostModal').on('click', function () {
+            $('#costForm')[0].reset();  // Reset the form
+            $('#addCostModalLabel').text('Add Cost');  // Update modal title
+            $('#id').val('');  // Clear the hidden ID field
+        });
+
+        // Open Edit Location Modal
+        $('#costTable').on('click', '.edit-cost', function () {
+            const button = $(this);
+            const Id = button.data('id');
+            const page_type = button.data('page_type');
+            const min_page = button.data('min_page');
+            const max_page = button.data('max_page');
+            const black_price = button.data('black_price');
+            const color_price = button.data('color_price');
+            const status = button.data('status');
+            
+            $('#id').val(Id);
+            $('#page_type').val(page_type);
+            $('#min_page').val(min_page);
+            $('#max_page').val(max_page);
+            $('#black_price').val(black_price);
+            $('#color_price').val(color_price);
+            $('#status').val(status);
+            $('#addCostModalLabel').text('Edit Cost');  // Update modal title
+            $('#addCostModal').modal('show');
+        });
+
+        // // Save Location
+        // $('#costForm').on('submit', function (e) {
+        //     e.preventDefault();
+
+        //     const formData = new FormData(this);
+        //     console.log(formData);
+        //     const Id = $('#id').val();
+        //     console.log(Id);
+        //     const url = Id 
+        //         ? "{% url 'edit_cost' '0' %}".replace('0', Id)
+        //         : "{% url 'create_cost' %}";
+            
+        //     $.ajax({
+        //         url: url,
+        //         type: 'POST',
+        //         data: formData,
+        //         processData: false,
+        //         contentType: false,
+        //         headers: {
+        //             'X-CSRFToken': '{{ csrf_token }}'
+        //         },
+        //         success: function (response) {
+        //             $('#addCostModal').modal('hide');
+        //             alert(response.message);
+        //             $('.modal-backdrop').remove();  // Remove backdrop
+                  
+        //             table.ajax.reload();  // Reload DataTable
+        //         },
+        //         error: function () {
+        //             alert('Failed to save cost. Please try again.');
+        //         }
+        //     });
+        // });
+
+
+        $("#costForm").validate({
+        rules: {
+            page_type: {
+                required: true
+            },
+            min_page: {
+                required: true
+            },
+            max_page: {
+                required: true
+            },
+            black_price : {
+                required: true
+            },
+            color_price : {
+                required: true
+            }
+        },
+        messages: {
+            page_type: {
+                required: "Please enter a page type"
+            },
+            min_page: {
+                required: "Please enter a min page"
+            },
+            max_page: {
+                required: "Please enter a max page"
+            },
+            black_price: {
+                required: "Please enter a black price"
+            },
+            color_price: {
+                required: "Please enter a color price"
+            },
+        },
+        submitHandler: function (form) {
+            // The form will not be submitted until here because of validate
+            const Id = $('#id').val();
+            const url = Id
+                ? "{% url 'edit_cost' '0' %}".replace('0', Id)
+                : "{% url 'create_cost' %}";
+
+            // Create FormData for sending data
+            const formData = new FormData(form);
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                processData: false, // Don't process the data
+                contentType: false, // Let the browser set the content type
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}' // CSRF Token for protection
+                },
+                success: function (response) {
+                    $('#addCostModal').modal('hide');
+                    Swal.fire({
+                        title: "Success!",
+                        text: response.message,
+                        icon: "success"
+                        });
+                    $('.modal-backdrop').remove();  // Remove backdrop
+                  
+                    table.ajax.reload();  // Reload DataTable
+                    
+                },
+                error: function () {
+                    Swal.fire({
+                        title: "Error!",
+                        icon: "error"
+                        });
+                }
+            });
+        }
+    });
+
+        // Delete Cost
+        $('#costTable').on('click', '.delete-cost', function () {
+            const button = $(this);
+            const Id = button.data('id');
+            console.log(Id);
+            if (!confirm('Are you sure you want to delete this cost?')) return;
+
+            $.ajax({
+                url: "{% url 'delete_cost' '0' %}".replace('0', Id),
+                type: 'DELETE',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    Swal.fire({
+                        title: "Success!",
+                        text: "Cost deleted successfully.",
+                        icon: "success"
+                        });
+                    table.ajax.reload();  // Reload DataTable
+                },
+                error: function () {
+                    alert('Failed to delete cost. Please try again.');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

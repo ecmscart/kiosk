@@ -1,0 +1,149 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% extends 'admin/layouts/admin_layout.html' %}
+{% block title %} Orders{% endblock %}
+{% block content %}
+<div class="content-wrapper">
+    <div class="container">
+        <h2 class="py-3">Orders</h2>
+        <div class="table-responsive">
+            <table id="orderTable" class="display table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Total Paid</th>
+                        <th>Page Selected</th>
+                        <th>No. of copy</th>
+                        <th>Page type</th>
+                        <th>Date Paid</th>
+                        <th>Date Printed</th>
+                        <th>Order Status</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- DataTable rows are populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    
+   
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    let table = '';
+    $(document).ready(function () {
+        // Initialize DataTable
+        table = $('#orderTable').DataTable({
+        processing: false,
+        serverSide: true,
+        searching: true,
+        paging: true,
+        order: [[0, 'DESC']],
+        pageLength: 10,
+        stateSave: false,
+        ajax: {
+            "url": "{% url 'display_order' %}",
+            
+        },
+        columns: [
+            { data: 'total_paid',name:'total_paid',orderable: false,searchable: false },
+            { data: 'page_selected',orderable: false,searchable: false },
+            { data: 'no_copy',orderable: false,searchable: false },
+            { data: 'page_type',orderable: false,searchable: false },
+            { data: 'date_paid',orderable: false,searchable: false },
+            { data: 'date_printed',orderable: false,searchable: false },
+            { data: 'order_status',orderable: false,searchable: false },
+            { data: 'Created At',orderable: false,searchable: false },
+            { data: null, orderable: false, searchable: false } // Placeholder for action
+            
+        ],
+        columnDefs: [
+            
+            {
+                targets: 0,
+                render: function (data, type, row) {
+                  var total_paid = (row.total_paid!=null) ? row.total_paid : '--'; 
+                  return total_paid;
+                }
+            },
+
+            {
+                targets: 1,
+                render: function (data, type, row) {
+                  var page_selected = (row.page_selected!=null) ? row.page_selected : null; 
+                  return page_selected;
+                }
+            },
+           
+            {
+                targets: 2,
+                render: function (data, type, row) {
+                  var no_copy = (row.no_copy!=null) ? row.no_copy : null; 
+                  return no_copy;
+                }
+            },
+            {
+                targets: 3,
+                render: function (data, type, row) {
+                  var page_type = (row.page_type!=null) ? row.page_type : null; 
+                  return page_type;
+                }
+            },
+            
+            {
+                targets: 4,
+                render: function (data, type, row) {
+                  var date_paid = (row.date_paid!=null) ? row.date_paid : null; 
+                  return date_paid;
+                }
+            },
+
+            {
+                targets: 5,
+                render: function (data, type, row) {
+                  var date_printed = (row.date_printed!=null) ? row.date_printed : null; 
+                  return date_printed;
+                }
+            },
+
+            {
+                targets: 6,
+                render: function (data, type, row) {
+                  var order_status = (row.order_status!=null) ? row.order_status : null; 
+                  return order_status;
+                }
+            },
+
+            {
+                targets: 7,
+                render: function (data, type, row) {
+                    var created_at = (row.created_at!=null) ? row.created_at : null; 
+                    return created_at;
+                    
+                }
+            },
+
+           {
+                targets: -1,
+                data: null,
+                orderable: false,
+                className: 'text-end',
+                render: function (data, type, row) {
+                    return `
+            <a href="/app1/orders/${row.order_id}/" class="btn btn-sm btn-primary">
+                <i class="fas fa-eye"></i>
+            </a>
+        `;
+                },
+            },
+            
+        ],
+    }); 
+    });
+</script>
+{% endblock %}
