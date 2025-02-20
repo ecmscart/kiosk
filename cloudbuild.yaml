@@ -1,0 +1,22 @@
+steps:
+  # Build the Docker image
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "europe-west2-docker.pkg.dev/exactprint-project/cloud-run-source-deploy/kiosk/printkiosk:$COMMIT_SHA", "."]
+
+  # Push the Docker image to Google Artifact Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "europe-west2-docker.pkg.dev/exactprint-project/cloud-run-source-deploy/kiosk/printkiosk:$COMMIT_SHA"]
+
+  # Deploy the container to Cloud Run
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      - "run"
+      - "deploy"
+      - "printkiosk"
+      - "--image=europe-west2-docker.pkg.dev/exactprint-project/cloud-run-source-deploy/kiosk/printkiosk:$COMMIT_SHA"
+      - "--region=europe-west2"
+      - "--platform=managed"
+      - "--allow-unauthenticated"
+
+images:
+  - "europe-west2-docker.pkg.dev/exactprint-project/cloud-run-source-deploy/kiosk/printkiosk:$COMMIT_SHA"
